@@ -1,8 +1,8 @@
 <?php
 function uploadImage(String $file) {
   $addParams = ["folder" => "JustSite", "timestamp" => time()];
-  $API_SECRET = 'PX5SEu93f31wYu7XlfSehmkE6v8';
-  $API_KEY = '447825463518597';
+  $API_SECRET = '';
+  $API_KEY = '';
   $signatureString = '';
   foreach ($addParams as $key => $value) {
     $signatureString .= $key . '=' . $value . '&';
@@ -22,8 +22,8 @@ function deleteImage(String $link) {
   $match = [];
   preg_match('/([^\/]+).jpg$/m', $link, $match);
   $addParams = ["public_id" => 'JustSite/' . $match[1], 'timestamp' => time()];
-  $API_SECRET = 'PX5SEu93f31wYu7XlfSehmkE6v8';
-  $API_KEY = '447825463518597';
+  $API_SECRET = '';
+  $API_KEY = '';
   $signatureString = '';
   foreach ($addParams as $key => $value) {
     $signatureString .= $key . '=' . $value . '&';
