@@ -8,12 +8,6 @@ function action_add_entry() {
 }
 
 function action_about() {
-  if (isset($_COOKIE['PHPSESSID'])) {
-    session_start();
-  }
-  include('templates/header.html');
-  include('modules/sidebar/sidebar.php');
-  include('templates/about.html');
-  include('templates/footer.html');
+  include('modules/blog/views/about.php');
 }
 ?>

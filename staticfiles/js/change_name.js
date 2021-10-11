@@ -5,6 +5,7 @@ const inputListener = (event) => inputFunction(event, name)
 
 function changeListener(event) {
   if (event.target.dataset.change_name) {
+    document.removeEventListener('click', changeListener)
     $.ajax({
       type: 'POST',
       url: '/modules/users/views/change_name.php',
@@ -25,7 +26,6 @@ function changeListener(event) {
             $(".user__name").remove()
             $(".user__name__change").remove()
             $(".personal__user").append($input)
-            document.removeEventListener('click', changeListener)
             document.addEventListener('click', inputListener)
           } else {
             $('.error__message').remove()
@@ -60,6 +60,7 @@ function inputFunction(event, name) {
     document.removeEventListener('click', inputListener)
     document.addEventListener('click', changeListener)
   } else if (event.target.dataset.submit_input) {
+    document.removeEventListener('click', inputListener)
     event.preventDefault()
     const data = $(".personal__name__form").serialize();
     const re = /%20/gi;
@@ -71,7 +72,6 @@ function inputFunction(event, name) {
       $(".personal__name__form").remove()
       $(".personal__user").append($name)
       errorMessage('Вы не ввели новое имя', '.personal__avatar__change')
-      document.removeEventListener('click', inputListener)
       document.addEventListener('click', changeListener)
     } else {
       $.ajax({
@@ -91,7 +91,6 @@ function inputFunction(event, name) {
             $(".personal__name__form").remove()
             $(".personal__user").append($name)
             errorMessage(jsonData.error, '.personal__avatar__change')
-            document.removeEventListener('click', inputListener)
             document.addEventListener('click', changeListener)
           }
         },
@@ -104,7 +103,6 @@ function inputFunction(event, name) {
           $(".personal__name__form").remove()
           $(".personal__user").append($name)
           errorMessage('Произошла ошибка', '.personal__avatar__change')
-          document.removeEventListener('click', inputListener)
           document.addEventListener('click', changeListener)
         }
       })
