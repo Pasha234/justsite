@@ -1,4 +1,5 @@
 <?php
+# Cookie validation
 if (isset($_COOKIE['PHPSESSID'])) {
   session_start();
   try {
@@ -15,9 +16,10 @@ if (isset($_COOKIE['PHPSESSID'])) {
     throw new Exception("Error Processing Request", 0);
   }
 } else {
-  header("Location: http://$_SERVER[HTTP_HOST]/");
+  header("Location: http://$_SERVER[HTTP_HOST]/login");
 }
 
+# connection to the database
 try{
   require('db.php');
 } catch(PDOException $e) {
@@ -28,6 +30,7 @@ try{
   throw new Exception("Error Processing Request", 0);
 }
 
+# HTML
 include('templates/header.html');
 include('modules/sidebar/sidebar.php');
 print <<<_HTML
@@ -36,8 +39,8 @@ print <<<_HTML
     <h2 class="add__header">Описание</h2>
     <textarea name="text" id="add__text" cols="30" rows="10" class="add__textarea" placeholder="Введите текст (можно оставить пустым)"></textarea>
     <label id="add-drop-area" for="postImg" style="display: none;">
-      <p>Загрузите изображения с помощью диалога выбора файлов или перетащив нужные изображения в выделенную область</p>
-      <input name="file" type="file" id="postImg" accept="image/*" onchange="handleFiles(this.files)">
+      <p>Загрузите изображения с помощью диалога выбора файлов или перетащив нужные изображения в выделенную область <small>(Максимальный размер файла 20 МБ и максимум файлов - 5)</small></p>
+      <input name="file" type="file" id="postImg" accept="image/*" onchange="handleInput(this.files)" multiple>
     </label>
     <div class="gallery" style="display: none;">
     </div>

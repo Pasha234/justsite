@@ -31,15 +31,15 @@ $(document).ready(function () {
                   </div>
               `
             }
-            
-            
             cardHTML += `
               <p class="content__text" data-modal="true">${post.text}</p>
             `
-            if (post.img) {
-              cardHTML += `<img src="${post.img}" alt="" class="content__img" data-modal="true">`
-            } else {
-              cardHTML += `<img src="" alt="" class="content__img" data-modal="true">`
+            if (post.imgs.length) {
+              cardHTML += `<div class="img__container" data-modal="true">`
+              for (img of post.imgs) {
+                cardHTML += `<img class="img${img.img_order}" src="${img.img_link}" alt="" data-modal="true">`
+              }
+              cardHTML += `</div>`
             }
             cardHTML += `
               </div>
@@ -52,19 +52,7 @@ $(document).ready(function () {
           if (!jsonData.posts[10]) {
             $('#more_posts').css('display', 'none')
             $('body').off('click', loadListener)
-            // $('.content').off('scroll', scrollListener)
           }
-          // $('.content').css('display', 'none')
-          // let height = $('.content').height()
-          // $('.content').css('display', 'block')
-          // $('.content').on('scroll', scrollListener)
-          // console.log(height);
-          // function scrollListener(e) {
-          //   // console.log((e.target.scrollTop / height) * 100);
-          //   if (((e.target.scrollTop / height) * 100) > 70) {
-          //     loadPosts()
-          //   }
-          // }
         } else {
           console.log('Jopa');
         }
@@ -78,10 +66,4 @@ $(document).ready(function () {
     }
   }
   loadPosts()
-  // console.log('Высота: ', $('.content').innerHeight());
-  // $('.content').on('scroll', function(e) {
-  //   console.log(e.target.scrollTop);
-  // })
-  
-  // $('.content').css('position', 'initial')
 })

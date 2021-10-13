@@ -10,7 +10,8 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
       $counter = 1;
       while ($card = $dbreq->fetch()) {
         $user = $db->query("SELECT * from users where id = " . $card['user_id'])->fetch();
-        $post = array('text' => $card['text'], 'img' => $card['img'], 'user_name' => $user['nickname'], 'user_avatar' => $user['avatar'], 'user_id' => $user['id'], 'user_deleted' => $user['deleted']);
+        $imgs = $db->query("SELECT img_link, img_order FROM entries_img WHERE entry_id=" . $card['id'])->fetchAll();
+        $post = array('text' => $card['text'], 'user_name' => $user['nickname'], 'user_avatar' => $user['avatar'], 'user_id' => $user['id'], 'user_deleted' => $user['deleted'], 'imgs' => $imgs);
         $posts[$counter] = $post;
         $counter++;
       }

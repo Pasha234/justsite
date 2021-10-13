@@ -3,13 +3,13 @@ let redirect = true
 document.addEventListener('click', (event) => {
   if(redirect){
     if(event.target.dataset.modal){
-      const card = event.target.parentNode
+      let card = $(event.target.parentNode)
+      if (!card.hasClass('content__card')) {
+        card = card.parent()
+      }
       const $modal = modal({
         is_post: true,
-        user_logo: card.querySelector('.user__logo').src,
-        user_name: card.querySelector('.user__link').innerHTML,
-        text: card.querySelector('.content__text').innerHTML,
-        img_link: card.querySelector('.content__img').src
+        card: card
       })
       $modal.open()
     }

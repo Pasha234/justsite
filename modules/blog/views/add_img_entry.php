@@ -1,6 +1,6 @@
 <?php
 require('../../../cloudinary_upload.php');
-
+header('Content-Type: application/json');
 if (isset($_COOKIE['PHPSESSID'])) {
   session_start();
   try {
@@ -24,13 +24,18 @@ try{
   require('../../../db.php');
 } catch(PDOException $e) {
   $err_text = date("F j, Y, H:i") . PHP_EOL . $e . PHP_EOL;
-  $handle = fopen('log.txt', 'a');
+  $handle = fopen('../../../log.txt', 'a');
   fwrite($handle, $err_text);
   fclose($handle);
   echo json_encode(array('success' => 0));
 }
 
 if ('POST' == $_SERVER['REQUEST_METHOD']) {
+  // var_dump($_FILES);
+  // if ($_FILES) {
+  //   print "Response: ok";
+  // }
+  // exit;
   list($input, $errors, $defaults) = validate_form($db);
   if (!$errors) {
     process_form($db, $input);
@@ -45,30 +50,31 @@ function validate_form($db) {
   $errors = [];
   $defaults = [];
   $input = [];
-  if (isset($_FILES['file']) && $_FILES['file']['error'] != 4 || (isset($_POST['text']) && str_replace(' ', '', $_POST['text']))){
+  if ($_FILES || (isset($_POST['text']) && str_replace(' ', '', $_POST['text']))){
     if (isset($_POST['text']) && str_replace(' ', '', $_POST['text'])) {
       $input['text'] = htmlentities($_POST['text']);
       $defaults['text'] = $_POST['text'];
     } else {
       $input['text'] = '';
     }
-    if (isset($_FILES['file']) && $_FILES['file']['error'] != 4) {
-      if ($_FILES['file']['size'] >= 20971520) {
-        $errors[] = 'Файл слишком большой';
-      } else if (!($_FILES['file']['type'] == 'image/png' || $_FILES['file']['type'] == 'image/jpeg')) {
-        $errors[] = 'Неподдерживаемый тип файла';
-      } else {
+    if ($_FILES) {
+      foreach($_FILES as $key => $file) {
+        if ($file['size'] >= 20971520) {
+          $errors[] = 'Файл слишком большой';
+        } else if (!($file['type'] == 'image/png' || $file['type'] == 'image/jpeg')) {
+          $errors[] = 'Неподдерживаемый тип файла';
+        } else {
           $uploaddir = '../../../storage/img/';
           $file_name = uniqid('', true);
-          if ($_FILES['file']['type'] == 'image/jpeg') {
+          if ($file['type'] == 'image/jpeg') {
             $uploadfile = $uploaddir . $file_name . '.jpg';
-          } else if ($_FILES['file']['type'] == 'image/png') {
+          } else if ($file['type'] == 'image/png') {
             $uploadfile = $uploaddir . $file_name . '.png';
           }
-          if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)){
+          if (move_uploaded_file($file['tmp_name'], $uploadfile)){
             $max_width = 1200;
             $max_height = 800;
-            if ($_FILES['file']['type'] == 'image/jpeg') {
+            if ($file['type'] == 'image/jpeg') {
               $img = imagecreatefromjpeg($uploadfile);
               $w_src = imagesx($img);
               $h_src = imagesy($img);
@@ -96,7 +102,7 @@ function validate_form($db) {
               imagejpeg($bg, $uploadfile, $quality);
               $result = uploadImage($uploadfile);
               unlink($uploadfile);
-            } else if ($_FILES['file']['type'] == 'image/png') {
+            } else if ($file['type'] == 'image/png') {
               $img = imagecreatefrompng($uploadfile);
               $w_src = imagesx($img);
               $h_src = imagesy($img);
@@ -128,8 +134,8 @@ function validate_form($db) {
               unlink($uploaddir . $file_name . '.jpg');
               unlink($uploadfile);
             }
-            if ($result) {
-              $input['file'] = $result['url'];
+            if (isset($result['url'])) {
+              $input['file'][$key] = $result['url'];
             } else {
               $errors[] = 'Не удалось загрузить картинку';
             }
@@ -137,6 +143,8 @@ function validate_form($db) {
             $errors[] = 'Не удалось прочитать файл';
           }
       }
+      }
+      
     } else {
       $input['file'] = '';
     }
@@ -148,8 +156,17 @@ function validate_form($db) {
 
 function process_form($db, $input) {
   try{
-    $stmt = $db->prepare('INSERT INTO entries (user_id, text, img) VALUES (?, ?, ?)');
-    $stmt->execute(array($_SESSION['id'], $input['text'], $input['file']));
+    $stmt = $db->prepare('INSERT INTO entries (user_id, text) VALUES (?, ?)');
+    $stmt->execute(array($_SESSION['id'], $input['text']));
+    if ($input['file']) {
+      $checkReq = $db->prepare('SELECT id FROM entries WHERE user_id=? ORDER BY add_time DESC LIMIT 1');
+      $checkReq->execute(array($_SESSION['id']));
+      $entry_id = $checkReq->fetch()['id'];
+      $stmt2 = $db->prepare('INSERT INTO entries_img (entry_id, img_link, img_order) VALUES (?, ?, ?)');
+      foreach ($input['file'] as $key => $file) {
+        $stmt2->execute(array($entry_id, $file, ($key + 1)));
+      }
+    }
     echo json_encode(array('success' => 1));
   } catch (PDOException $e) {
     $err_text = date("F j, Y, H:i") . PHP_EOL . $e . PHP_EOL;

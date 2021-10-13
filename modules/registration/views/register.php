@@ -16,14 +16,14 @@ if("POST" == $_SERVER['REQUEST_METHOD']){
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "Content-type: text/html; charset=utf-8\r\n";
     $headers .= "To: <$input[email]>\r\n";
-    $headers .= "From: <mail@example.com>\r\n";
+    $headers .= "From: <justsite.online\r\n";
     $message = '
     <html>
     <head>
     <title>Подтвердите Email</title>
     </head>
     <body>
-    <p>Что бы подтвердить Email, перейдите по <a href="http://example.com/confirmed.php?hash=' . $hash . '">ссылке</a></p>
+    <p>Что бы подтвердить Email, перейдите по <a href="http://justsite.online/confirm?hash=' . $hash . '">ссылке</a></p>
     </body>
     </html>
     ';
